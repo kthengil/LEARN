@@ -7,7 +7,7 @@
   <meta name="description" content="KriT LEARN — Free, hands-on engineering courses in Ansible, Apache Kafka, and Observability, each with Architect & Engineer tracks and local browser-based Docker labs." />
   <title>KriT LEARN — Engineering Courses &amp; Hands-On Labs</title>
   <link rel="icon" type="image/svg+xml" href="./assets/KriT.svg" />
-  <link rel="stylesheet" href="./assets/portal.css?v=2" />
+  <link rel="stylesheet" href="./assets/portal.css?v=3" />
   <script>(function () {
     var t;
     try { t = JSON.parse(localStorage.getItem('learn-theme')); } catch (e) {}
@@ -34,154 +34,160 @@
     </div>
   </header>
 
+  <div class="sub-header" aria-label="LEARN motto">
+    <div class="container sub-header-inner">
+      <span class="sh-word">Learn</span>
+      <span class="sh-dot" aria-hidden="true">&middot;</span>
+      <span class="sh-word">Explore</span>
+      <span class="sh-dot" aria-hidden="true">&middot;</span>
+      <span class="sh-word">Apply</span>
+      <span class="sh-dot" aria-hidden="true">&middot;</span>
+      <span class="sh-word">Reflect</span>
+      <span class="sh-dot" aria-hidden="true">&middot;</span>
+      <span class="sh-word">Navigate</span>
+    </div>
+  </div>
+
   <main class="page-bg">
     <div class="container">
       <section class="hero">
         <span class="eyebrow"><span class="eyebrow-dot"></span> Self-Paced Engineering Library</span>
         <h1>Deep-dive courses with real local labs.</h1>
         <p class="hero-lead">
-          Read any course straight in your browser across two tracks — <strong>Architect</strong> (concepts &amp; system design)
-          and <strong>Engineer</strong> (hands-on implementation). When you are ready for labs, download only the lab zip you need
-          and run it locally with Docker.
+          Read any course straight in your browser across two tracks — <strong>Architect</strong> (concepts &amp; design)
+          and <strong>Engineer</strong> (hands-on implementation). Download only the lab zip you need and run it locally with Docker.
         </p>
       </section>
 
       <div class="section-head">
         <h2 class="section-title">Courses &amp; Lab Setup</h2>
+        <span class="section-hint">Hover a tile for details &amp; lab download</span>
       </div>
 
       <section class="tile-grid" aria-label="Course catalog and lab setup">
         <!-- Tile 1: Ansible -->
-        <article class="tile" style="--tile-accent: linear-gradient(135deg, #ee0000, #6366f1);">
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-                <defs><linearGradient id="g-ans" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ee0000"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
-                <rect width="32" height="32" rx="8" fill="url(#g-ans)"/>
-                <path d="M16 7 8 25h3.6l1.7-4.2h5.4L20.4 25H24L16 7Zm-1.5 10.8L16 14l1.5 3.8h-3Z" fill="#fff"/>
-              </svg>
+        <article class="tile" tabindex="0" style="--tile-accent: linear-gradient(135deg, #ee0000, #6366f1);">
+          <div class="tile-compact">
+            <div class="tile-top">
+              <div class="tile-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <defs><linearGradient id="g-ans" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ee0000"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+                  <rect width="32" height="32" rx="8" fill="url(#g-ans)"/>
+                  <path d="M16 7 8 25h3.6l1.7-4.2h5.4L20.4 25H24L16 7Zm-1.5 10.8L16 14l1.5 3.8h-3Z" fill="#fff"/>
+                </svg>
+              </div>
+              <span class="tile-badge">37 Lessons</span>
             </div>
-            <span class="tile-badge">Course · 37 Lessons</span>
+            <h2><a class="tile-title-link" href="./courses/ansible/">Ansible</a></h2>
           </div>
-          <h2>Ansible</h2>
-          <p class="tile-desc">
-            A complete Ansible course in two tracks: Architect, for how Ansible works and how to design automation content beyond servers,
-            and Engineer, for hands-on playbooks, roles, dynamic inventory, plugins, and collection testing across four managed nodes.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Architect &amp; Engineer</span>
-            <span class="pill">Controller + 4 Rocky 9 Nodes</span>
-            <span class="pill">Lab <code>:28201</code></span>
-          </div>
-          <div class="tile-actions">
-            <a class="btn btn-primary" href="./courses/ansible/">
-              Open Course
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-            <a class="btn btn-secondary" href="./downloads/ansible-lab.zip" download>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download Lab (.zip)
-            </a>
+          <div class="tile-expand">
+            <p class="tile-desc">
+              Architect &amp; Engineer tracks covering playbooks, roles, dynamic inventory, plugins, and testing on a controller + 4 Rocky Linux 9 nodes (<code>:28201</code>).
+            </p>
+            <div class="tile-actions">
+              <a class="btn btn-primary" href="./courses/ansible/">
+                Open Course
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+              <a class="btn btn-secondary" href="./downloads/ansible-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Lab (.zip)
+              </a>
+            </div>
           </div>
         </article>
 
         <!-- Tile 2: Apache Kafka -->
-        <article class="tile" style="--tile-accent: linear-gradient(135deg, #1f2937, #ea580c);">
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-                <defs><linearGradient id="g-kfk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f2937"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
-                <rect width="32" height="32" rx="8" fill="url(#g-kfk)"/>
-                <path d="M6 12c3-3 6-3 10 0s7 3 10 0M6 18c3-3 6-3 10 0s7 3 10 0M6 24c3-3 6-3 10 0s7 3 10 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-              </svg>
+        <article class="tile" tabindex="0" style="--tile-accent: linear-gradient(135deg, #1f2937, #ea580c);">
+          <div class="tile-compact">
+            <div class="tile-top">
+              <div class="tile-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <defs><linearGradient id="g-kfk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f2937"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
+                  <rect width="32" height="32" rx="8" fill="url(#g-kfk)"/>
+                  <path d="M6 12c3-3 6-3 10 0s7 3 10 0M6 18c3-3 6-3 10 0s7 3 10 0M6 24c3-3 6-3 10 0s7 3 10 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <span class="tile-badge">29 Lessons</span>
             </div>
-            <span class="tile-badge">Course · 29 Lessons</span>
+            <h2><a class="tile-title-link" href="./courses/apache-kafka/">Apache Kafka</a></h2>
           </div>
-          <h2>Apache Kafka</h2>
-          <p class="tile-desc">
-            Event streaming from first principles to production operations: Architect covers log abstractions, partitioning, delivery guarantees,
-            and architecture trade-offs; Engineer runs hands-on labs in a local three-broker KRaft cluster with Kafka Connect.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Architect &amp; Engineer</span>
-            <span class="pill">3-Broker KRaft + Connect</span>
-            <span class="pill">Lab <code>:28202</code></span>
-          </div>
-          <div class="tile-actions">
-            <a class="btn btn-primary" href="./courses/apache-kafka/">
-              Open Course
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-            <a class="btn btn-secondary" href="./downloads/apache-kafka-lab.zip" download>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download Lab (.zip)
-            </a>
+          <div class="tile-expand">
+            <p class="tile-desc">
+              Event streaming concepts, partitioning, and delivery guarantees plus hands-on labs in a 3-broker KRaft cluster with Kafka Connect (<code>:28202</code>).
+            </p>
+            <div class="tile-actions">
+              <a class="btn btn-primary" href="./courses/apache-kafka/">
+                Open Course
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+              <a class="btn btn-secondary" href="./downloads/apache-kafka-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Lab (.zip)
+              </a>
+            </div>
           </div>
         </article>
 
         <!-- Tile 3: Observability -->
-        <article class="tile" style="--tile-accent: linear-gradient(135deg, #a855f7, #06b6d4);">
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-                <rect width="32" height="32" rx="8" fill="hsl(285 65% 50%)"/>
-                <text x="16" y="21.5" font-family="system-ui,sans-serif" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">OB</text>
-              </svg>
+        <article class="tile" tabindex="0" style="--tile-accent: linear-gradient(135deg, #a855f7, #06b6d4);">
+          <div class="tile-compact">
+            <div class="tile-top">
+              <div class="tile-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <rect width="32" height="32" rx="8" fill="hsl(285 65% 50%)"/>
+                  <text x="16" y="21.5" font-family="system-ui,sans-serif" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">OB</text>
+                </svg>
+              </div>
+              <span class="tile-badge">27 Lessons</span>
             </div>
-            <span class="tile-badge">Course · 27 Lessons</span>
+            <h2><a class="tile-title-link" href="./courses/observability/">Observability</a></h2>
           </div>
-          <h2>Observability</h2>
-          <p class="tile-desc">
-            Metrics, logs, traces, SLOs, and alerting end to end: Architect covers telemetry signals and platform design; Engineer works
-            hands-on with Prometheus, PromQL, Alertmanager, Grafana, Loki, Tempo, and OpenTelemetry Collector on a live shop app.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Architect &amp; Engineer</span>
-            <span class="pill">Prometheus · Grafana · Loki · Tempo</span>
-            <span class="pill">Lab <code>:28207</code></span>
-          </div>
-          <div class="tile-actions">
-            <a class="btn btn-primary" href="./courses/observability/">
-              Open Course
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-            <a class="btn btn-secondary" href="./downloads/observability-lab.zip" download>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Download Lab (.zip)
-            </a>
+          <div class="tile-expand">
+            <p class="tile-desc">
+              Metrics, logs, traces, SLOs, and alerting with hands-on Prometheus, Alertmanager, Grafana, Loki, Tempo, and OpenTelemetry Collector (<code>:28207</code>).
+            </p>
+            <div class="tile-actions">
+              <a class="btn btn-primary" href="./courses/observability/">
+                Open Course
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+              <a class="btn btn-secondary" href="./downloads/observability-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Lab (.zip)
+              </a>
+            </div>
           </div>
         </article>
 
         <!-- Tile 4: Lab Setup -->
-        <article class="tile tile-setup" style="--tile-accent: linear-gradient(135deg, #6366f1, #06b6d4);">
-          <div class="tile-top">
-            <div class="tile-icon" aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-                <defs><linearGradient id="g-lab" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
-                <rect width="32" height="32" rx="8" fill="url(#g-lab)"/>
-                <path d="M9 12l5 4-5 4M16 20h7" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+        <article class="tile tile-setup" tabindex="0" style="--tile-accent: linear-gradient(135deg, #6366f1, #06b6d4);">
+          <div class="tile-compact">
+            <div class="tile-top">
+              <div class="tile-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <defs><linearGradient id="g-lab" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+                  <rect width="32" height="32" rx="8" fill="url(#g-lab)"/>
+                  <path d="M9 12l5 4-5 4M16 20h7" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <span class="tile-badge">3 Lab Zips</span>
             </div>
-            <span class="tile-badge">Start Here for Labs</span>
+            <h2><a class="tile-title-link" href="./lab-setup/">Lab Setup</a></h2>
           </div>
-          <h2>Lab Setup</h2>
-          <p class="tile-desc">
-            Everything you need to download, verify, and run any course's local Docker lab on Linux, macOS, or Windows. Includes
-            individual lab zip downloads, readiness checks (<code>check.sh</code> / <code>check.ps1</code>), port settings, and troubleshooting.
-          </p>
-          <div class="pill-row">
-            <span class="pill">Docker Compose v2</span>
-            <span class="pill">Linux · macOS · Windows</span>
-            <span class="pill">127.0.0.1 Only</span>
-          </div>
-          <div class="tile-actions">
-            <a class="btn btn-primary" href="./lab-setup/">
-              Open Lab Setup Guide
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </a>
-            <a class="btn btn-secondary" href="./lab-setup/#downloads">
-              All Lab Zips
-            </a>
+          <div class="tile-expand">
+            <p class="tile-desc">
+              Step-by-step guide to download, verify (<code>check.sh</code> / <code>check.ps1</code>), and run any course's local Docker lab on Linux, macOS, or Windows.
+            </p>
+            <div class="tile-actions">
+              <a class="btn btn-primary" href="./lab-setup/">
+                Open Lab Setup
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </a>
+              <a class="btn btn-secondary" href="./lab-setup/#downloads">
+                Download Lab Zips
+              </a>
+            </div>
           </div>
         </article>
       </section>
@@ -217,6 +223,6 @@
     </div>
   </footer>
 
-  <script src="./assets/portal.js"></script>
+  <script src="./assets/portal.js?v=2"></script>
 </body>
 </html>

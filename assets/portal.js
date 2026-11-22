@@ -37,6 +37,27 @@
       });
     }
 
+    document.querySelectorAll('.tile-compact').forEach(function (compact) {
+      compact.addEventListener('click', function (e) {
+        if (e.target.closest('a, button')) return;
+        var tile = compact.closest('.tile');
+        if (!tile) return;
+        var wasOpen = tile.classList.contains('is-expanded');
+        document.querySelectorAll('.tile.is-expanded').forEach(function (t) {
+          t.classList.remove('is-expanded');
+        });
+        if (!wasOpen) tile.classList.add('is-expanded');
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.tile')) {
+        document.querySelectorAll('.tile.is-expanded').forEach(function (t) {
+          t.classList.remove('is-expanded');
+        });
+      }
+    });
+
     document.querySelectorAll('.copy-btn').forEach(function (copyBtn) {
       copyBtn.addEventListener('click', function () {
         var wrap = copyBtn.closest('.code-wrap');
