@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c0d10" />
+  <meta name="description" content="Download and set up the local Docker labs for KriT LEARN courses: Ansible, Apache Kafka, and Observability." />
+  <title>Lab Setup — KriT LEARN</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Ctext x='16' y='21.5' font-family='system-ui,sans-serif' font-size='15' font-weight='800' fill='%23fff' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="../assets/portal.css" />
+  <script>(function () {
+    var t;
+    try { t = JSON.parse(localStorage.getItem('learn-theme')); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    document.documentElement.dataset.theme = t;
+  })();</script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand-lockup" href="../" aria-label="KriT LEARN Home">
+        <span class="brand-mark" aria-hidden="true">K</span>
+        <span class="brand-word">KriT <span class="brand-sub">LEARN</span></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a class="nav-link" href="../">Courses</a>
+        <a class="nav-link active" href="./">Lab Setup</a>
+      </nav>
+      <button id="theme-toggle" class="theme-btn" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="theme-label">Theme</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-bg">
+    <div class="container">
+      <section class="hero" style="padding-bottom: 24px;">
+        <a class="breadcrumb" href="../">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back to All Courses
+        </a>
+        <h1>Lab Setup Guide</h1>
+        <p class="hero-lead">
+          Each course has its own self-contained Docker lab. Download only the lab zip for the course you want to practice,
+          run the included readiness check, start it with <code>docker compose up -d</code>, and work directly in browser terminals.
+        </p>
+      </section>
+
+      <!-- Section 1: Downloads -->
+      <section id="downloads" class="setup-section">
+        <h2>1. Download a Course Lab</h2>
+        <p>
+          Every zip file extracts into its own folder containing <code>docker-compose.yml</code>, container definitions,
+          <code>config.env</code>, readiness scripts (<code>check.sh</code> &amp; <code>check.ps1</code>), and a <code>README.md</code>.
+          Each lab uses its own default port, so you can keep them side by side without conflicts.
+        </p>
+
+        <div class="download-grid">
+          <!-- Ansible Lab -->
+          <article class="dl-card">
+            <div class="dl-card-head">
+              <div class="dl-card-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <defs><linearGradient id="g-ans-d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ee0000"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs>
+                  <rect width="32" height="32" rx="8" fill="url(#g-ans-d)"/>
+                  <path d="M16 7 8 25h3.6l1.7-4.2h5.4L20.4 25H24L16 7Zm-1.5 10.8L16 14l1.5 3.8h-3Z" fill="#fff"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Ansible Lab</h3>
+                <div class="dl-port">http://localhost:28201</div>
+              </div>
+            </div>
+            <p>Ansible control node (<code>ansible-core</code> 2.21, <code>ansible-lint</code>) + 4 Rocky Linux 9 systemd nodes + browser workstation.</p>
+            <div class="dl-meta">
+              <span class="pill">2 GB min / 4 GB rec</span>
+              <span class="pill">~5 GB disk</span>
+            </div>
+            <div class="dl-actions">
+              <a class="btn btn-primary" href="../downloads/ansible-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download ansible-lab.zip
+              </a>
+              <a class="btn btn-secondary" href="../courses/ansible/#/l/l-lab-setup">Open "Build your lab" Lesson</a>
+            </div>
+          </article>
+
+          <!-- Kafka Lab -->
+          <article class="dl-card">
+            <div class="dl-card-head">
+              <div class="dl-card-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <defs><linearGradient id="g-kfk-d" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f2937"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
+                  <rect width="32" height="32" rx="8" fill="url(#g-kfk-d)"/>
+                  <path d="M6 12c3-3 6-3 10 0s7 3 10 0M6 18c3-3 6-3 10 0s7 3 10 0M6 24c3-3 6-3 10 0s7 3 10 0" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <h3>Apache Kafka Lab</h3>
+                <div class="dl-port">http://localhost:28202</div>
+              </div>
+            </div>
+            <p>Three-broker Kafka 4.1 KRaft cluster, <code>producer</code> &amp; <code>consumer</code> client machines, Kafka Connect worker, and browser workstation.</p>
+            <div class="dl-meta">
+              <span class="pill">3 GB min / 4 GB rec</span>
+              <span class="pill">~5 GB disk</span>
+            </div>
+            <div class="dl-actions">
+              <a class="btn btn-primary" href="../downloads/apache-kafka-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download apache-kafka-lab.zip
+              </a>
+              <a class="btn btn-secondary" href="../courses/apache-kafka/#/l/ke-lab-setup">Open "Build your lab" Lesson</a>
+            </div>
+          </article>
+
+          <!-- Observability Lab -->
+          <article class="dl-card">
+            <div class="dl-card-head">
+              <div class="dl-card-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+                  <rect width="32" height="32" rx="8" fill="hsl(285 65% 50%)"/>
+                  <text x="16" y="21.5" font-family="system-ui,sans-serif" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">OB</text>
+                </svg>
+              </div>
+              <div>
+                <h3>Observability Lab</h3>
+                <div class="dl-port">http://localhost:28207</div>
+              </div>
+            </div>
+            <p>Prometheus, Alertmanager, Grafana, Loki, Tempo, OpenTelemetry Collector, S3 store, instrumented shop app, and 2 Rocky 9 nodes.</p>
+            <div class="dl-meta">
+              <span class="pill">2 GB min / 4 GB rec</span>
+              <span class="pill">~5 GB disk</span>
+            </div>
+            <div class="dl-actions">
+              <a class="btn btn-primary" href="../downloads/observability-lab.zip" download>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download observability-lab.zip
+              </a>
+              <a class="btn btn-secondary" href="../courses/observability/#/l/obe-lab-setup">Open "Build your lab" Lesson</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Section 2: Prerequisites -->
+      <section class="setup-section">
+        <h2>2. Prerequisites</h2>
+        <p>Nothing is installed on your host beyond Docker. Every lab binds strictly to <code>127.0.0.1</code> so it is reachable only from your own machine.</p>
+        <div class="req-grid">
+          <div class="req-card">
+            <h3>Docker Runtime</h3>
+            <ul>
+              <li><strong>Windows:</strong> Docker Desktop with the <strong>WSL 2</strong> backend (Linux containers).</li>
+              <li><strong>macOS:</strong> Docker Desktop (Apple silicon or Intel).</li>
+              <li><strong>Linux:</strong> Docker Engine with <strong>Compose v2.17+</strong> and <strong>Buildx</strong> plugins, or Docker Desktop.</li>
+            </ul>
+          </div>
+          <div class="req-card">
+            <h3>Machine Resources &amp; Network</h3>
+            <ul>
+              <li><strong>Memory:</strong> 4 GB allocated to Docker recommended (2 GB min for Ansible &amp; Observability, 3 GB min for Kafka).</li>
+              <li><strong>Disk space:</strong> ~5 GB free per lab for locally built container images.</li>
+              <li><strong>Internet access (first build):</strong> pulls public base images from <code>docker.io</code> and <code>quay.io</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Step-by-Step Setup -->
+      <section class="setup-section">
+        <h2>3. Step-by-Step Setup</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Unzip the lab archive</h3>
+              <p>Extract the downloaded zip file (for example <code>ansible-lab.zip</code>) and open a terminal inside the extracted folder:</p>
+              <div class="code-wrap">
+                <div class="code-head"><span>bash (Linux / macOS)</span><button class="copy-btn" type="button">Copy</button></div>
+                <pre>unzip ansible-lab.zip
+cd ansible-lab</pre>
+              </div>
+              <div class="code-wrap">
+                <div class="code-head"><span>PowerShell (Windows)</span><button class="copy-btn" type="button">Copy</button></div>
+                <pre>Expand-Archive .\ansible-lab.zip -DestinationPath .
+cd .\ansible-lab</pre>
+              </div>
+              <p>Replace <code>ansible-lab</code> with <code>apache-kafka-lab</code> or <code>observability-lab</code> for the other courses.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Run the readiness check</h3>
+              <p>
+                The check installs nothing—it verifies Docker, Compose v2, Buildx, memory, disk, port availability, and registry connectivity,
+                and writes <code>.env</code> from <code>config.env</code>.
+              </p>
+              <div class="code-wrap">
+                <div class="code-head"><span>bash (Linux / macOS)</span><button class="copy-btn" type="button">Copy</button></div>
+                <pre>./check.sh</pre>
+              </div>
+              <div class="code-wrap">
+                <div class="code-head"><span>PowerShell (Windows)</span><button class="copy-btn" type="button">Copy</button></div>
+                <pre>powershell -ExecutionPolicy Bypass -File .\check.ps1</pre>
+              </div>
+              <p>Fix anything marked <code>FAIL</code>; lines marked <code>WARN</code> are advisory.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Start the lab</h3>
+              <p>Run Docker Compose from inside the lab folder. The first start builds the local container images (takes a few minutes); subsequent starts take seconds.</p>
+              <div class="code-wrap">
+                <div class="code-head"><span>Terminal</span><button class="copy-btn" type="button">Copy</button></div>
+                <pre>docker compose up -d</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>Open the lab in your browser</h3>
+              <p>Open the local URL for your running lab—you will get browser terminals on every machine in the topology:</p>
+              <div class="table-wrap" style="margin-top: 10px;">
+                <table>
+                  <thead>
+                    <tr><th>Course Lab</th><th>Default URL</th><th>Included Web UIs</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>Ansible</strong></td><td><code>http://localhost:28201</code></td><td>Browser terminals + <code>/web/&lt;node&gt;/</code> proxy</td></tr>
+                    <tr><td><strong>Apache Kafka</strong></td><td><code>http://localhost:28202</code></td><td>Browser terminals (3 brokers, producer, consumer, connect)</td></tr>
+                    <tr><td><strong>Observability</strong></td><td><code>http://localhost:28207</code></td><td>Browser terminals + <code>/grafana/</code>, <code>/prometheus/</code>, <code>/alertmanager/</code></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Customizing Ports -->
+      <section class="setup-section">
+        <h2>4. Changing the Default Port</h2>
+        <p>If another program already uses a lab's default port, edit <code>config.env</code> inside the lab folder:</p>
+        <div class="code-wrap">
+          <div class="code-head"><span>config.env</span><button class="copy-btn" type="button">Copy</button></div>
+          <pre>LAB_PORT=28301</pre>
+        </div>
+        <div class="callout">
+          <strong>Important:</strong> After editing <code>config.env</code>, re-run <code>./check.sh</code> (or <code>check.ps1</code>) so the new port is validated and written to <code>.env</code>, then run <code>docker compose up -d</code> to apply it. Use your custom port wherever the course lessons show the default.
+        </div>
+      </section>
+
+      <!-- Section 5: Day-to-Day Commands -->
+      <section class="setup-section">
+        <h2>5. Day-to-Day Commands</h2>
+        <p>Run these commands inside the extracted lab folder (e.g. <code>ansible-lab</code>, <code>apache-kafka-lab</code>, or <code>observability-lab</code>):</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>What you want to do</th><th>Command</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Pause the lab, keeping your work &amp; volumes</td><td><code>docker compose stop</code></td></tr>
+              <tr><td>Resume a paused lab</td><td><code>docker compose up -d</code></td></tr>
+              <tr><td>Check container status / view logs</td><td><code>docker compose ps</code> / <code>docker compose logs &lt;service&gt;</code></td></tr>
+              <tr><td>Reset the lab to a completely fresh state</td><td><code>docker compose down -v &amp;&amp; docker compose up -d</code></td></tr>
+              <tr><td>Rebuild after downloading a newer lab zip</td><td><code>docker compose up -d --build</code></td></tr>
+              <tr><td>Remove containers, volumes, and local lab images</td><td><code>docker compose down -v --rmi local</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 6: Troubleshooting -->
+      <section class="setup-section" style="padding-bottom: 56px;">
+        <h2>6. Troubleshooting</h2>
+        <div class="faq-grid">
+          <div class="faq-card">
+            <h3>Port already in use</h3>
+            <p>Stop the service holding the port, or change <code>LAB_PORT</code> in <code>config.env</code>, re-run <code>./check.sh</code> / <code>check.ps1</code>, and run <code>docker compose up -d</code>.</p>
+          </div>
+          <div class="faq-card">
+            <h3><code>permission denied</code> on Docker socket (Linux)</h3>
+            <p>Add your user to the <code>docker</code> group with <code>sudo usermod -aG docker $USER</code>, then log out and log back in (or run <code>newgrp docker</code>).</p>
+          </div>
+          <div class="faq-card">
+            <h3>Docker Hub pull errors or <code>toomanyrequests</code></h3>
+            <p>Docker Hub rate-limits anonymous pulls per IP address. Wait a few minutes or run <code>docker login</code> with a free Docker Hub account, then re-run <code>docker compose up -d</code>.</p>
+          </div>
+          <div class="faq-card">
+            <h3>A lab machine shows a red status dot</h3>
+            <p>The container may still be booting. Wait a few seconds, or inspect with <code>docker compose ps</code> and <code>docker compose logs &lt;machine&gt;</code>. A fresh reset (<code>docker compose down -v &amp;&amp; docker compose up -d</code>) restores clean machines.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        Course content &copy; 2026 Krishnadas Thengil (<a href="../LICENSE-CONTENT">CC BY-NC-SA 4.0</a>). Code &amp; lab files: <a href="../LICENSE">MIT</a>. KriT and LEARN are the owner's trademarks.
+      </div>
+      <div class="footer-links">
+        <a href="../">All Courses</a>
+        <a href="../LICENSE">MIT License</a>
+        <a href="../LICENSE-CONTENT">Content License</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../assets/portal.js"></script>
+</body>
+</html>

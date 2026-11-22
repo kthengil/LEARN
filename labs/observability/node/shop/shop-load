@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Steady traffic for the lab shop: about five checkouts per second, plus some home-page requests."""
+import random
+import time
+import urllib.error
+import urllib.request
+
+ITEMS = ['book', 'lamp', 'mug', 'chair', 'plant']
+while True:
+    path = '/' if random.random() < 0.2 else f'/checkout?item={random.choice(ITEMS)}'
+    try:
+        urllib.request.urlopen(f'http://localhost:8080{path}', timeout=10).read()
+    except (urllib.error.URLError, TimeoutError, ConnectionError):
+        pass
+    time.sleep(random.uniform(0.1, 0.3))

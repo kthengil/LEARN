@@ -1,0 +1,6 @@
+#!/bin/sh
+# The lab's S3 store: SeaweedFS in one process, with the buckets for Loki and Tempo.
+set -eu
+( until wget -qO- http://s3:9333/cluster/status >/dev/null 2>&1; do sleep 1; done; sleep 3
+  for b in loki tempo; do echo "s3.bucket.create -name $b" | weed shell -master=s3:9333 >/dev/null 2>&1 || true; done ) &
+exec /entrypoint.sh server -ip=s3 -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json -volume.max=100 -master.volumeSizeLimitMB=64

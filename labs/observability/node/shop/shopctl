@@ -1,0 +1,17 @@
+#!/bin/bash
+# Switch faults in the lab shop on and off (read by the services on every request).
+#   shopctl status            show the current faults
+#   shopctl errors <percent>  inventory answers this share of stock requests with HTTP 500
+#   shopctl delay <ms>        inventory adds this many milliseconds to every stock request
+#   shopctl reset             no faults
+set -euo pipefail
+f=/etc/shop/faults.json
+[[ -s $f ]] || echo '{}' > "$f"
+case "${1:-status}" in
+  status) ;;
+  errors) python3 -c 'import json,sys; f=sys.argv[1]; d=json.load(open(f)); d["inventory_error_rate"]=int(sys.argv[2])/100; json.dump(d,open(f,"w"))' "$f" "${2:?percent}" ;;
+  delay)  python3 -c 'import json,sys; f=sys.argv[1]; d=json.load(open(f)); d["inventory_delay_ms"]=int(sys.argv[2]); json.dump(d,open(f,"w"))' "$f" "${2:?milliseconds}" ;;
+  reset)  echo '{}' > "$f" ;;
+  *) echo "usage: shopctl status|errors <percent>|delay <ms>|reset" >&2; exit 2 ;;
+esac
+echo "faults: $(cat "$f")"

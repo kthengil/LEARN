@@ -1,0 +1,6 @@
+{
+  "identities": [
+    { "name": "loki", "credentials": [{ "accessKey": "loki", "secretKey": "loki-lab-secret" }], "actions": ["Read:loki", "Write:loki", "List:loki"] },
+    { "name": "tempo", "credentials": [{ "accessKey": "tempo", "secretKey": "tempo-lab-secret" }], "actions": ["Read:tempo", "Write:tempo", "List:tempo"] }
+  ]
+}

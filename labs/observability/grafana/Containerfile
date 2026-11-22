@@ -1,0 +1,3 @@
+# Grafana for the Observability lab, with the lab's data sources provisioned.
+FROM docker.io/grafana/grafana:13.3.0
+COPY datasources.yaml /etc/grafana/provisioning/datasources/lab.yaml

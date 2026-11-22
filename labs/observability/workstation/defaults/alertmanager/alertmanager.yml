@@ -1,0 +1,8 @@
+# Alertmanager configuration for the Observability lab. On the workstation this file is ~/alertmanager/alertmanager.yml;
+# after a change, check it with `amtool check-config` and reload with `curl -X POST http://alertmanager:9093/-/reload`.
+route:
+  receiver: default
+  group_by: [alertname]
+
+receivers:
+  - name: default

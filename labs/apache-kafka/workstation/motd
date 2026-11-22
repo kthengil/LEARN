@@ -1,0 +1,3 @@
+Lab workstation: the browser gateway of the Apache Kafka lab.
+The Kafka machines are reachable by name over SSH, e.g.  ssh broker1
+

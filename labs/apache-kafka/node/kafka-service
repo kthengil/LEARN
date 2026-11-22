@@ -1,0 +1,47 @@
+#!/bin/bash
+# Manage this machine's Kafka process, like a system service: start | stop | restart | status | logs
+# On brokers it runs the Kafka broker + KRaft controller; on the connect machine, the Connect worker.
+set -uo pipefail
+if [[ $(id -un) != appuser ]]; then exec su-exec appuser "$0" "$@"; fi
+. /etc/lab/service.env
+role=${LAB_ROLE:-client}
+case $role in
+  broker)  what="Kafka broker"; port=9092; cmd=(/etc/kafka/docker/run) ;;
+  connect) what="Kafka Connect worker"; port=8083; cmd=(/opt/kafka/bin/connect-distributed.sh /etc/lab/connect-distributed.properties) ;;
+  *) echo "This is a client machine: there is no Kafka service to manage here."; exit 1 ;;
+esac
+pidfile=/var/log/kafka/$role.pid
+log=/var/log/kafka/$role.log
+
+pid() { [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null && cat "$pidfile"; }
+listening() { (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; }
+
+start() {
+  if p=$(pid); then echo "$what is already running (pid $p)"; return 0; fi
+  echo "Starting $what..."
+  setsid nohup "${cmd[@]}" >>"$log" 2>&1 < /dev/null &
+  echo $! > "$pidfile"
+  for _ in $(seq 1 90); do
+    if listening; then echo "$what started (pid $(cat "$pidfile")), listening on port $port"; return 0; fi
+    if ! pid >/dev/null; then echo "$what exited during start-up. Last log lines:"; tail -n 20 "$log"; return 1; fi
+    sleep 1
+  done
+  echo "$what is still starting; check: kafka-service logs"
+}
+
+stop() {
+  local p; p=$(pid) || { echo "$what is not running"; return 0; }
+  echo "Stopping $what (pid $p)..."
+  kill -TERM -- "-$p" 2>/dev/null || kill -TERM "$p"
+  for _ in $(seq 1 60); do kill -0 "$p" 2>/dev/null || { rm -f "$pidfile"; echo "$what stopped"; return 0; }; sleep 1; done
+  echo "Still running after 60 s; forcing it to stop"; kill -KILL -- "-$p" 2>/dev/null; rm -f "$pidfile"
+}
+
+case ${1:-status} in
+  start) start ;;
+  stop) stop ;;
+  restart) stop; start ;;
+  status) if p=$(pid); then echo "$what: running (pid $p)$(listening && echo ", port $port open")"; else echo "$what: stopped"; fi ;;
+  logs) tail -n "${2:-50}" "$log" ;;
+  *) echo "usage: kafka-service start | stop | restart | status | logs [lines]"; exit 1 ;;
+esac

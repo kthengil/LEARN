@@ -1,0 +1,26 @@
+# Ansible control node for the course lab: Rocky Linux 9, Python 3.12, ansible-core and ansible-lint in a virtualenv.
+FROM quay.io/rockylinux/rockylinux:9
+
+ARG ANSIBLE_CORE=2.21.5
+ARG ANSIBLE_LINT=26.10.1
+ARG ANSIBLE_BUILDER=3.2.0
+ARG ANSIBLE_NAVIGATOR=26.10.0
+RUN dnf -y install python3.12 python3.12-pip openssh-server openssh-clients git tree less vim-minimal nano procps-ng iproute hostname sudo \
+ && dnf clean all \
+ && python3.12 -m venv /opt/ansible \
+ && /opt/ansible/bin/pip install --no-cache-dir --retries 10 --timeout 60 "ansible-core==${ANSIBLE_CORE}" "ansible-lint==${ANSIBLE_LINT}" \
+      "ansible-builder==${ANSIBLE_BUILDER}" "ansible-navigator==${ANSIBLE_NAVIGATOR}" \
+ && useradd -m -s /bin/bash ansible \
+ && echo 'ansible ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/ansible && chmod 0440 /etc/sudoers.d/ansible \
+ && printf '%s\n' 'AuthorizedKeysFile /etc/lab-keys/authorized_keys' 'PasswordAuthentication no' 'PermitRootLogin no' \
+      > /etc/ssh/sshd_config.d/10-lab.conf \
+ && printf '%s\n' '# Lab nodes are recreated often, so their host keys are not pinned (lab only, never for real servers).' \
+      'Host node1 node2 node3 node4' '  StrictHostKeyChecking no' '  UserKnownHostsFile /dev/null' '  LogLevel ERROR' \
+      > /etc/ssh/ssh_config.d/10-lab.conf \
+ && printf '%s\n' 'export PATH=/opt/ansible/bin:$PATH' 'export ANSIBLE_FORCE_COLOR=1' \
+      '[ "$PWD" = "$HOME" ] && [ -d "$HOME/lab" ] && cd "$HOME/lab"' > /etc/profile.d/ansible-lab.sh \
+ && printf 'Ansible control node. The lab project is ~/lab (ansible.cfg + inventory); run ansible commands from there.\nManaged nodes: node1 (lb), node2 and node3 (web), node4 (db). Try:  ansible all -m ping\n\n' > /etc/motd
+
+COPY --chown=ansible:ansible project/ /home/ansible/lab/
+COPY --chmod=755 entrypoint.sh /usr/local/sbin/lab-controller
+CMD ["/usr/local/sbin/lab-controller"]

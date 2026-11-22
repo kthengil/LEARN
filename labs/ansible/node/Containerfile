@@ -1,0 +1,32 @@
+# Managed node for the Ansible course lab: Rocky Linux 9 with systemd and sshd, like a small VM.
+FROM quay.io/rockylinux/rockylinux:9
+
+RUN dnf -y install systemd openssh-server openssh-clients sudo python3 procps-ng iproute hostname less vim-minimal \
+ && dnf clean all \
+ && systemctl enable sshd \
+ && systemctl mask systemd-logind.service getty.target console-getty.service systemd-udevd.service \
+ && useradd -m -s /bin/bash ansible \
+ && echo 'ansible ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/ansible \
+ && chmod 0440 /etc/sudoers.d/ansible \
+ && printf '%s\n' \
+      '# Trusted keys: the lab workstation (browser terminals) and the controller (Ansible).' \
+      'AuthorizedKeysFile /etc/lab-keys/authorized_keys /etc/ansible-keys/authorized_keys .ssh/authorized_keys' \
+      'PasswordAuthentication no' 'PermitRootLogin no' > /etc/ssh/sshd_config.d/10-lab.conf
+
+# chronyd (installed later by the course's common role) may not set the clock in a container: run it with -x (measure
+# only) and drop the CAP_SYS_TIME condition, so it stays running and `state: started` is idempotent. The package keeps
+# this pre-existing sysconfig file (it is %config(noreplace)).
+RUN mkdir -p /etc/systemd/system/chronyd.service.d \
+ && printf '%s\n' '[Unit]' '# Lab machines are containers: chronyd runs with -x (see /etc/sysconfig/chronyd).' \
+      'ConditionCapability=' > /etc/systemd/system/chronyd.service.d/10-lab.conf \
+ && printf '%s\n' '# Command-line options for chronyd' \
+      '# -x: lab machines are containers and may not set the clock, so chronyd only measures it.' \
+      'OPTIONS="-F 2 -x"' > /etc/sysconfig/chronyd
+# systemd needs a writable cgroup tree. The container has a private cgroup namespace, so this remount
+# only affects its own cgroups (needs CAP_SYS_ADMIN, not --privileged).
+RUN printf '%s\n' '#!/bin/sh' 'mount -o remount,rw /sys/fs/cgroup 2>/dev/null' 'exec /sbin/init' > /usr/local/sbin/lab-init \
+ && chmod 755 /usr/local/sbin/lab-init
+
+EXPOSE 22 80
+STOPSIGNAL SIGRTMIN+3
+CMD ["/usr/local/sbin/lab-init"]

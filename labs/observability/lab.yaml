@@ -1,0 +1,39 @@
+# Lab manifest: read by the workstation to build the browser UI, SSH config and status checks.
+id: observability
+name: Observability lab
+description: Prometheus, Alertmanager, Grafana, Loki, Tempo and the OpenTelemetry Collector around an instrumented shop
+port: 28207
+instructions: |
+  Pick a machine on the left to open a terminal. Shift-click a machine to open a second terminal on it.
+
+  • workstation is where you work: promtool, amtool, logcli, curl and jq; `$PROM`, `$AM`, `$LOKI`, `$TEMPO` and
+    `$GRAFANA` hold the service URLs. `~/prometheus` and `~/alertmanager` are the live configuration of those servers.
+  • app runs the shop (services shop and inventory, and a load generator); `shopctl` switches faults on and off.
+  • node1 and node2 are Rocky Linux 9 machines; every Rocky machine runs node_exporter on port 9100.
+  • Grafana, Prometheus and Alertmanager open from the links on the left.
+
+  First check: on workstation, run
+    curl -s $PROM/-/ready
+
+  Lifecycle (on your machine, in the lab folder):
+    docker compose up -d          start or resume the lab
+    docker compose stop           pause it, keeping all data
+    docker compose down -v        remove everything for a fresh start
+
+links:
+  - { name: "Grafana", url: "grafana/" }
+  - { name: "Prometheus", url: "prometheus/" }
+  - { name: "Alertmanager", url: "alertmanager/" }
+
+machines:
+  - { name: workstation, group: Workstation, local: true, description: "promtool, amtool, logcli; ~/prometheus and ~/alertmanager" }
+  - { name: app, group: Machines, user: ops, description: "Rocky Linux 9: the shop (ports 8080, 8081) and node_exporter", service: { port: 8080, label: shop } }
+  - { name: node1, group: Machines, user: ops, description: "Rocky Linux 9 with node_exporter", service: { port: 9100, label: node_exporter } }
+  - { name: node2, group: Machines, user: ops, description: "Rocky Linux 9 with node_exporter", service: { port: 9100, label: node_exporter } }
+  - { name: prometheus, group: Observability, terminal: false, description: "Prometheus 3.15: metrics and alert rules", service: { port: 9090, label: prometheus } }
+  - { name: alertmanager, group: Observability, terminal: false, description: "Alertmanager 0.34: routing and notifications", service: { port: 9093, label: alertmanager } }
+  - { name: grafana, group: Observability, terminal: false, description: "Grafana 13.3: dashboards and Explore", service: { port: 3000, label: grafana } }
+  - { name: loki, group: Observability, terminal: false, description: "Loki 3.7: logs", service: { port: 3100, label: loki } }
+  - { name: tempo, group: Observability, terminal: false, description: "Tempo 3.1: traces", service: { port: 3200, label: tempo } }
+  - { name: otel-collector, group: Observability, terminal: false, description: "OpenTelemetry Collector 0.164: traces and logs pipeline", service: { port: 4318, label: otlp } }
+  - { name: s3, group: Observability, terminal: false, description: "SeaweedFS S3 store for Loki and Tempo", service: { port: 8333, label: s3 } }

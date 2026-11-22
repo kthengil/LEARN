@@ -1,0 +1,41 @@
+# Loki for the Observability lab: one process (all components), index and chunks in the lab's S3 store.
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  log_level: warn
+
+common:
+  path_prefix: /loki
+  replication_factor: 1
+  ring:
+    kvstore: { store: inmemory }
+  storage:
+    s3:
+      endpoint: s3:8333
+      bucketnames: loki
+      access_key_id: loki
+      secret_access_key: loki-lab-secret
+      s3forcepathstyle: true
+      insecure: true
+      region: us-east-1
+
+schema_config:
+  configs:
+    - from: 2026-01-01
+      store: tsdb
+      object_store: s3
+      schema: v13
+      index: { prefix: index_, period: 24h }
+
+limits_config:
+  retention_period: 168h
+  allow_structured_metadata: true
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: s3
+
+analytics:
+  reporting_enabled: false

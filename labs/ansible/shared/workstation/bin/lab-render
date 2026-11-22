@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""Reads /etc/lab/lab.yaml and writes what the workstation needs:
+/run/lab/lab.json (for the web UI), /run/lab/machines.tsv (for lab-connect) and ~lab/.ssh/config.
+With --check it only validates the manifest (used at image build time)."""
+import json, sys, yaml
+
+REQUIRED = ('id', 'name', 'machines')
+lab = yaml.safe_load(open('/etc/lab/lab.yaml'))
+errors = [f'lab.yaml: missing "{k}"' for k in REQUIRED if not lab.get(k)]
+names = set()
+for i, m in enumerate(lab.get('machines') or []):
+    if not m.get('name'): errors.append(f'machine {i}: missing "name"')
+    elif m['name'] in names: errors.append(f'machine {m["name"]}: duplicate name')
+    names.add(m.get('name'))
+    if not m.get('local') and m.get('terminal', True) and not m.get('user'):
+        errors.append(f'machine {m.get("name")}: SSH machines need "user"')
+if errors:
+    sys.exit('Invalid lab manifest:\n  ' + '\n  '.join(errors))
+if '--check' in sys.argv:
+    print(f'lab.yaml OK: {lab["name"]}, {len(names)} machines'); sys.exit(0)
+
+machines = [{
+    'name': m['name'],
+    'description': m.get('description', ''),
+    'group': m.get('group', 'Machines'),
+    'terminal': m.get('terminal', True),
+    'local': bool(m.get('local')),
+    'service': m.get('service'),
+} for m in lab['machines']]
+json.dump({
+    'id': lab['id'], 'name': lab['name'], 'description': lab.get('description', ''),
+    'instructions': lab.get('instructions', ''), 'links': lab.get('links', []), 'machines': machines,
+}, open('/run/lab/lab.json', 'w'), indent=1)
+
+with open('/run/lab/machines.tsv', 'w') as f:
+    for m in lab['machines']:
+        if m.get('terminal', True):
+            f.write(f'{m["name"]}\t{"yes" if m.get("local") else "no"}\t{m.get("description", "")}\n')
+
+# Lab machines are disposable and recreated often, so host keys are not pinned. This applies to this lab only.
+ssh = ['Host *', '  IdentityFile ~/.ssh/id_ed25519', '  StrictHostKeyChecking no', '  UserKnownHostsFile /dev/null',
+       '  LogLevel ERROR', '  ServerAliveInterval 15', '  ConnectTimeout 5', '']
+for m in lab['machines']:
+    if not m.get('local') and m.get('terminal', True):
+        ssh += [f'Host {m["name"]}', f'  HostName {m.get("host", m["name"])}', f'  User {m["user"]}', f'  Port {m.get("port", 22)}', '']
+open('/home/lab/.ssh/config', 'w').write('\n'.join(ssh))

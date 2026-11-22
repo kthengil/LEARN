@@ -1,0 +1,20 @@
+#!/bin/bash
+# Started by ttyd for each browser terminal: /tty/?arg=<machine>. Only machines listed in lab.yaml are allowed.
+name=${1:-}
+line=$(awk -F'\t' -v n="$name" '$1 == n' /run/lab/machines.tsv 2>/dev/null)
+if [[ -z $name || -z $line ]]; then
+  echo "Unknown machine '${name}'. Pick one from the list on the left."; sleep 3600; exit 1
+fi
+IFS=$'\t' read -r _ local description <<<"$line"
+cd ~
+if [[ $local == yes ]]; then
+  [[ -f /etc/motd ]] && cat /etc/motd
+  exec bash -l
+fi
+while true; do
+  printf '\e[2m→ %s  %s\e[0m\n' "$name" "$description"
+  ssh "$name"
+  printf '\n\e[33mConnection to %s closed.\e[0m Press Enter to reconnect, or close this tab. ' "$name"
+  read -r _ || exit 0
+  clear
+done

@@ -1,0 +1,62 @@
+# Rocky Linux 9 machine for the Observability lab, with systemd and sshd like a small VM. Every machine runs
+# node_exporter; the machine named "app" also runs the shop (two Python services and a load generator).
+FROM quay.io/rockylinux/rockylinux:9
+
+ARG NODE_EXPORTER_VERSION=1.12.1
+RUN dnf -y install systemd openssh-server openssh-clients sudo procps-ng iproute hostname less vim-minimal jq \
+      python3.12 python3.12-pip \
+ && dnf clean all \
+ && systemctl enable sshd \
+ && systemctl mask systemd-logind.service getty.target console-getty.service systemd-udevd.service \
+ && useradd -m -s /bin/bash ops \
+ && echo 'ops ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/ops && chmod 0440 /etc/sudoers.d/ops \
+ && printf '%s\n' '# Trusted key: the lab workstation (browser terminals).' \
+      'AuthorizedKeysFile /etc/lab-keys/authorized_keys .ssh/authorized_keys' \
+      'PasswordAuthentication no' 'PermitRootLogin no' > /etc/ssh/sshd_config.d/10-lab.conf
+
+# node_exporter from the Prometheus release, as a systemd service on port 9100. The build picks the archive for its
+# own architecture (TARGETARCH from BuildKit, else uname -m) and checks it against the release's sha256sums.txt.
+ARG TARGETARCH
+RUN arch="${TARGETARCH:-$(uname -m | sed -e 's/^x86_64$/amd64/' -e 's/^aarch64$/arm64/')}" \
+ && file="node_exporter-${NODE_EXPORTER_VERSION}.linux-${arch}.tar.gz" \
+ && base="https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}" \
+ && curl -fsSL --retry 8 --retry-delay 5 --retry-all-errors --connect-timeout 30 --speed-limit 10240 --speed-time 60 \
+      -o "/tmp/${file}" "${base}/${file}" \
+ && curl -fsSL --retry 8 --retry-delay 5 --retry-all-errors --connect-timeout 30 -o /tmp/sha256sums.txt "${base}/sha256sums.txt" \
+ && (cd /tmp && grep " ${file}\$" sha256sums.txt | sha256sum -c -) \
+ && mv "/tmp/${file}" /tmp/ne.tgz && rm -f /tmp/sha256sums.txt \
+ && tar -xzf /tmp/ne.tgz -C /tmp && install -m 755 /tmp/node_exporter-*/node_exporter /usr/local/bin/ && rm -rf /tmp/ne.tgz /tmp/node_exporter-* \
+ && useradd -r -s /sbin/nologin node_exporter \
+ && printf '%s\n' '[Unit]' 'Description=Prometheus node_exporter' 'After=network.target' '' '[Service]' \
+      'User=node_exporter' 'ExecStart=/usr/local/bin/node_exporter --web.listen-address=:9100' 'Restart=on-failure' '' \
+      '[Install]' 'WantedBy=multi-user.target' > /etc/systemd/system/node_exporter.service \
+ && systemctl enable node_exporter
+
+# The shop: a Python 3.12 virtual environment with the Prometheus client and the OpenTelemetry SDK.
+RUN python3.12 -m venv /opt/shop \
+ && /opt/shop/bin/pip install --no-cache-dir --retries 10 --timeout 60 \
+      prometheus-client==0.26.0 opentelemetry-sdk==1.45.2 opentelemetry-exporter-otlp-proto-http==1.45.2 \
+ && useradd -r -s /sbin/nologin shop \
+ && install -d -o shop -g shop /var/log/shop /etc/shop \
+ && echo '{}' > /etc/shop/faults.json && chown shop:shop /etc/shop/faults.json
+COPY shop/shop.py shop/shop-load /opt/shop/
+COPY shop/shopctl /usr/local/bin/shopctl
+RUN chmod 755 /opt/shop/shop.py /opt/shop/shop-load /usr/local/bin/shopctl \
+ && for s in shop inventory; do printf '%s\n' '[Unit]' "Description=Lab shop: $s service" 'After=network.target' \
+      'ConditionHost=app' '' '[Service]' 'User=shop' "ExecStart=/opt/shop/bin/python /opt/shop/shop.py $s" \
+      'Environment=OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318' 'Restart=always' '' \
+      '[Install]' 'WantedBy=multi-user.target' > /etc/systemd/system/$s.service; done \
+ && printf '%s\n' '[Unit]' 'Description=Lab shop: load generator' 'After=shop.service' 'ConditionHost=app' '' \
+      '[Service]' 'User=shop' 'ExecStart=/opt/shop/bin/python /opt/shop/shop-load' 'Restart=always' '' \
+      '[Install]' 'WantedBy=multi-user.target' > /etc/systemd/system/shop-load.service \
+ && systemctl enable shop inventory shop-load \
+ && chmod 666 /etc/shop/faults.json
+
+# systemd needs a writable cgroup tree. The container has a private cgroup namespace, so this remount
+# only affects its own cgroups (needs CAP_SYS_ADMIN, not --privileged).
+RUN printf '%s\n' '#!/bin/sh' 'mount -o remount,rw /sys/fs/cgroup 2>/dev/null' 'exec /sbin/init' > /usr/local/sbin/lab-init \
+ && chmod 755 /usr/local/sbin/lab-init
+
+EXPOSE 22 8080 8081 9100
+STOPSIGNAL SIGRTMIN+3
+CMD ["/usr/local/sbin/lab-init"]

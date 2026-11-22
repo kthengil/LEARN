@@ -1,0 +1,150 @@
+# Observability course lab. Start:  docker compose up -d   then open  http://localhost:28207
+# Everything happens in the browser; nothing but Docker is needed on your machine.
+# Prometheus, Alertmanager, Grafana, Loki, Tempo and the OpenTelemetry Collector, a shop application instrumented
+# with Prometheus metrics, OpenTelemetry traces and JSON logs, two Rocky Linux nodes with node_exporter, and an
+# S3 store (SeaweedFS) for Loki and Tempo.
+name: observability-lab
+
+x-rocky: &rocky
+  build: { context: ./node, dockerfile: Containerfile }
+  image: ${LAB_REGISTRY:-localhost}/lab/obs-node:rocky9
+  networks: [lab]
+  restart: unless-stopped
+  # systemd runs as PID 1: a private cgroup namespace plus CAP_SYS_ADMIN lets each node remount only its own
+  # cgroups. No --privileged, no host mounts.
+  cgroup: private
+  cap_add: [SYS_ADMIN]
+  tmpfs: [/run, /run/lock, /tmp]
+
+services:
+  # Browser entry point, SSH gateway, proxy for the web UIs, and the tools: promtool, amtool, logcli, curl, jq.
+  workstation:
+    build:
+      context: ./shared/workstation
+      dockerfile: Containerfile
+      additional_contexts:
+        lab: .
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-workstation:1
+    hostname: workstation
+    ports: ["127.0.0.1:${LAB_PORT:-28207}:8080"]
+    volumes:
+      - lab-keys:/etc/lab-keys
+      - workstation-home:/home/lab
+      - prometheus-config:/srv/prometheus
+      - alertmanager-config:/srv/alertmanager
+    networks: [lab]
+    restart: unless-stopped
+
+  app:
+    <<: *rocky
+    hostname: app
+    volumes: [lab-keys:/etc/lab-keys:ro, shop-logs:/var/log/shop]
+
+  node1:
+    <<: *rocky
+    hostname: node1
+    volumes: [lab-keys:/etc/lab-keys:ro]
+
+  node2:
+    <<: *rocky
+    hostname: node2
+    volumes: [lab-keys:/etc/lab-keys:ro]
+
+  prometheus:
+    image: docker.io/prom/prometheus:v3.15.1
+    hostname: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+      - --web.external-url=http://localhost:${LAB_PORT:-28207}/prometheus/
+      - --web.route-prefix=/
+    volumes: [prometheus-config:/etc/prometheus:ro, prometheus-data:/prometheus]
+    depends_on: [workstation]
+    networks: [lab]
+    restart: unless-stopped
+
+  alertmanager:
+    image: docker.io/prom/alertmanager:v0.34.2
+    hostname: alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+      - --web.external-url=http://localhost:${LAB_PORT:-28207}/alertmanager/
+      - --web.route-prefix=/
+    volumes: [alertmanager-config:/etc/alertmanager:ro, alertmanager-data:/alertmanager]
+    depends_on: [workstation]
+    networks: [lab]
+    restart: unless-stopped
+
+  grafana:
+    build: { context: ./grafana, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-grafana:13.3.0
+    hostname: grafana
+    environment:
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      # A private lab: everyone who can open it (only from this machine) is a Grafana administrator.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes: [grafana-data:/var/lib/grafana]
+    networks: [lab]
+    restart: unless-stopped
+
+  loki:
+    build: { context: ./loki, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-loki:3.7.9
+    hostname: loki
+    volumes: [loki-data:/loki]
+    depends_on: [s3]
+    networks: [lab]
+    restart: unless-stopped
+
+  tempo:
+    build: { context: ./tempo, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-tempo:3.1.1
+    hostname: tempo
+    volumes: [tempo-data:/var/tempo]
+    depends_on: [s3]
+    networks: [lab]
+    restart: unless-stopped
+
+  otel-collector:
+    build: { context: ./otel-collector, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-otelcol:0.164.0
+    hostname: otel-collector
+    volumes: [shop-logs:/var/log/shop:ro]
+    depends_on: [app, loki, tempo]
+    networks: [lab]
+    restart: unless-stopped
+
+  s3:
+    build: { context: ./s3, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/obs-s3:4.48
+    hostname: s3
+    volumes: [s3-data:/data]
+    networks: [lab]
+    restart: unless-stopped
+
+networks:
+  lab: {}
+
+volumes:
+  lab-keys: {}
+  workstation-home: {}
+  prometheus-config: {}
+  prometheus-data: {}
+  alertmanager-config: {}
+  alertmanager-data: {}
+  grafana-data: {}
+  loki-data: {}
+  tempo-data: {}
+  shop-logs: {}
+  s3-data: {}

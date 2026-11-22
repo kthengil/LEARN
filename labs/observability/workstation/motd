@@ -1,0 +1,4 @@
+
+  Observability lab workstation: promtool, amtool, logcli, curl, jq. $PROM $AM $LOKI $TEMPO $GRAFANA hold the URLs.
+  ~/prometheus and ~/alertmanager are the live server configuration. First check:   curl -s $PROM/-/ready
+

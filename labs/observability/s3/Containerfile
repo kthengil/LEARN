@@ -1,0 +1,6 @@
+# S3 store for Loki and Tempo in the Observability lab: SeaweedFS (as in the Storage Engineering course).
+FROM docker.io/chrislusf/seaweedfs:4.48
+COPY s3.json /etc/seaweedfs/s3.json
+COPY start /usr/local/bin/lab-s3-start
+RUN chmod 755 /usr/local/bin/lab-s3-start
+ENTRYPOINT ["/usr/local/bin/lab-s3-start"]

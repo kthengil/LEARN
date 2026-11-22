@@ -1,0 +1,43 @@
+# Tempo 3 for the Observability lab: single binary (-target=all), blocks in the lab's S3 store. The metrics generator
+# turns spans into request rate, error and duration metrics and a service graph, written to Prometheus.
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+  log_level: warn
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc: { endpoint: 0.0.0.0:4317 }
+
+metrics_generator:
+  registry:
+    external_labels: { source: tempo }
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      endpoint: s3:8333
+      bucket: tempo
+      access_key: tempo
+      secret_key: tempo-lab-secret
+      insecure: true
+      forcepathstyle: true
+    wal:
+      path: /var/tempo/wal
+
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [span-metrics, service-graphs]
+
+usage_report:
+  reporting_enabled: false

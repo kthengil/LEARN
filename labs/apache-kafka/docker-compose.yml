@@ -1,0 +1,108 @@
+# Apache Kafka course lab. Start:  docker compose up -d   then open  http://localhost:28202
+# Everything happens in the browser; nothing but Docker is needed on your machine.
+name: kafka-lab
+
+x-node: &node
+  build: { context: ./node, dockerfile: Containerfile }
+  image: ${LAB_REGISTRY:-localhost}/lab/kafka-node:4.1.0
+  init: true
+  networks: [lab]
+  restart: unless-stopped
+  # The base image declares these folders as volumes; tmpfs stops each fresh start from leaving anonymous volumes behind.
+  tmpfs: [/etc/kafka/secrets, /mnt/shared/config]
+
+x-broker-env: &broker-env
+  LAB_ROLE: broker
+  LAB_BOOTSTRAP: broker1:9092,broker2:9092,broker3:9092
+  CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
+  KAFKA_PROCESS_ROLES: broker,controller
+  KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+  KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker1:9093,2@broker2:9093,3@broker3:9093
+  KAFKA_NUM_PARTITIONS: 3
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_MIN_INSYNC_REPLICAS: 2
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  KAFKA_LOG_DIRS: /var/lib/kafka/data
+  KAFKA_HEAP_OPTS: -Xms384m -Xmx384m
+
+x-client-env: &client-env
+  LAB_ROLE: client
+  LAB_BOOTSTRAP: broker1:9092,broker2:9092,broker3:9092
+
+services:
+  # Browser entry point and SSH jump host, built from the shared lab platform plus this lab's lab.yaml.
+  workstation:
+    build:
+      context: ./shared/workstation
+      dockerfile: Containerfile
+      additional_contexts:
+        lab: .
+    image: ${LAB_REGISTRY:-localhost}/lab/kafka-workstation:1
+    hostname: workstation
+    ports: ["127.0.0.1:${LAB_PORT:-28202}:8080"]
+    volumes:
+      - lab-keys:/etc/lab-keys
+      - workstation-home:/home/lab
+    networks: [lab]
+    restart: unless-stopped
+
+  broker1:
+    <<: *node
+    hostname: broker1
+    environment: { <<: *broker-env, KAFKA_NODE_ID: 1, KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker1:9092, KAFKA_BROKER_RACK: rack-1 }
+    volumes: [lab-keys:/etc/lab-keys:ro, broker1-data:/var/lib/kafka/data]
+
+  broker2:
+    <<: *node
+    hostname: broker2
+    environment: { <<: *broker-env, KAFKA_NODE_ID: 2, KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:9092, KAFKA_BROKER_RACK: rack-2 }
+    volumes: [lab-keys:/etc/lab-keys:ro, broker2-data:/var/lib/kafka/data]
+
+  broker3:
+    <<: *node
+    hostname: broker3
+    environment: { <<: *broker-env, KAFKA_NODE_ID: 3, KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:9092, KAFKA_BROKER_RACK: rack-3 }
+    volumes: [lab-keys:/etc/lab-keys:ro, broker3-data:/var/lib/kafka/data]
+
+  producer:
+    <<: *node
+    hostname: producer
+    environment: *client-env
+    volumes: [lab-keys:/etc/lab-keys:ro]
+    tmpfs: [/etc/kafka/secrets, /mnt/shared/config, /var/lib/kafka/data]
+
+  consumer:
+    <<: *node
+    hostname: consumer
+    environment: *client-env
+    volumes: [lab-keys:/etc/lab-keys:ro]
+    tmpfs: [/etc/kafka/secrets, /mnt/shared/config, /var/lib/kafka/data]
+
+  # Kafka Connect worker; started from its terminal with `kafka-service start` in the Connect lab.
+  connect:
+    <<: *node
+    hostname: connect
+    environment:
+      LAB_ROLE: connect
+      LAB_AUTOSTART: "false"
+      LAB_BOOTSTRAP: broker1:9092,broker2:9092,broker3:9092
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+    volumes: [lab-keys:/etc/lab-keys:ro, connect-data:/data]
+    tmpfs: [/etc/kafka/secrets, /mnt/shared/config, /var/lib/kafka/data]
+
+networks:
+  lab: {}
+
+volumes:
+  lab-keys: {}
+  workstation-home: {}
+  broker1-data: {}
+  broker2-data: {}
+  broker3-data: {}
+  connect-data: {}

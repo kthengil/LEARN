@@ -1,0 +1,58 @@
+# OpenTelemetry Collector (contrib) for the Observability lab: a gateway between the shop and the backends.
+#   traces: OTLP from the shop          -> Tempo (OTLP/gRPC)
+#   logs:   JSON log files of the shop  -> Loki (OTLP/HTTP), with service.name, severity and trace context
+#   its own metrics on :8888            <- scraped by Prometheus
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 }
+  filelog/shop:
+    include: [/var/log/shop/*.log]
+    start_at: end
+    operators:
+      # Parse the JSON line into a temporary attribute, take timestamp, severity, trace context and service name from
+      # it, then drop it: the JSON line stays the log body and is parsed at query time with LogQL's json parser.
+      - type: json_parser
+        parse_to: attributes.tmp
+        timestamp: { parse_from: attributes.tmp.time, layout_type: gotime, layout: '2006-01-02T15:04:05.000Z' }
+        severity: { parse_from: attributes.tmp.level }
+      - type: trace_parser
+        trace_id: { parse_from: attributes.tmp.trace_id }
+        span_id: { parse_from: attributes.tmp.span_id }
+      - type: move
+        from: attributes.tmp.service
+        to: resource["service.name"]
+      - type: remove
+        field: attributes.tmp
+
+processors:
+  batch: {}
+  resource/lab:
+    attributes:
+      - { key: deployment.environment, value: lab, action: upsert }
+      - { key: service.namespace, value: shop, action: upsert }
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls: { insecure: true }
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus: { host: 0.0.0.0, port: 8888 }
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [filelog/shop]
+      processors: [resource/lab, batch]
+      exporters: [otlphttp/loki]

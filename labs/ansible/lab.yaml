@@ -1,0 +1,32 @@
+# Lab manifest: read by the workstation to build the browser UI, SSH config and status checks.
+id: ansible-course
+name: Ansible lab
+description: An Ansible control node and four Rocky Linux 9 managed nodes with systemd
+port: 28201
+instructions: |
+  Pick a machine on the left to open a terminal. Shift-click a machine to open a second terminal on it.
+
+  • controller is the Ansible control node. The lab project is `~/lab` (ansible.cfg and inventory); terminals start there.
+  • node1 (group lb), node2 and node3 (group web) and node4 (group db) are the managed nodes: Rocky Linux 9 with systemd, user `ansible` with sudo.
+  • Web pages served by the nodes open in your browser under /web/<node>/, for example the links on the left.
+
+  First check: on controller, run
+    ansible all -m ping
+
+  Lifecycle (on your machine, in the lab folder):
+    docker compose up -d          start or resume the lab
+    docker compose stop           pause it, keeping all data
+    docker compose down -v        remove everything for a fresh start
+
+links:
+  - { name: "node1 web page (load balancer)", url: "web/node1/" }
+  - { name: "node2 web page", url: "web/node2/" }
+  - { name: "node3 web page", url: "web/node3/" }
+
+machines:
+  - { name: controller, group: Control node, user: ansible, description: "ansible-core, ansible-lint, project in ~/lab" }
+  - { name: node1, group: Managed nodes, user: ansible, description: "Rocky Linux 9, group lb", service: { port: 80, label: http } }
+  - { name: node2, group: Managed nodes, user: ansible, description: "Rocky Linux 9, group web", service: { port: 80, label: http } }
+  - { name: node3, group: Managed nodes, user: ansible, description: "Rocky Linux 9, group web", service: { port: 80, label: http } }
+  - { name: node4, group: Managed nodes, user: ansible, description: "Rocky Linux 9, group db" }
+  - { name: workstation, group: Workstation, local: true, description: "The lab gateway itself (no Ansible here)" }

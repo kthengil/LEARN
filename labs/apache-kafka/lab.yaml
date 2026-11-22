@@ -1,0 +1,28 @@
+# Lab manifest: read by the workstation to build the browser UI, SSH config and status checks.
+id: apache-kafka
+name: Apache Kafka lab
+description: A three-node Kafka 4.1 cluster (KRaft) with producer, consumer and Connect machines
+port: 28202
+instructions: |
+  Pick a machine on the left to open a terminal. Shift-click a machine to open a second terminal on it.
+
+  • producer and consumer are client machines: all Kafka tools are on the PATH, and `$BOOTSTRAP` lists the three brokers.
+  • broker1, broker2 and broker3 each run a Kafka broker and KRaft controller. Use `kafka-service status`, `kafka-service stop` and `kafka-service start` there to take a node down and bring it back.
+  • connect runs the Kafka Connect worker once you start it with `kafka-service start`. Its REST API is `curl -s localhost:8083/`, and connector files live in /data.
+
+  First check: on producer, run
+    kafka-metadata-quorum.sh --bootstrap-server $BOOTSTRAP describe --status
+
+  Lifecycle (on your machine, in the lab folder):
+    docker compose up -d          start or resume the lab
+    docker compose stop           pause it, keeping all data
+    docker compose down -v        remove everything for a fresh start
+
+machines:
+  - { name: broker1, group: Brokers, user: appuser, description: "Broker + KRaft controller, node 1, rack-1", service: { port: 9092, label: kafka } }
+  - { name: broker2, group: Brokers, user: appuser, description: "Broker + KRaft controller, node 2, rack-2", service: { port: 9092, label: kafka } }
+  - { name: broker3, group: Brokers, user: appuser, description: "Broker + KRaft controller, node 3, rack-3", service: { port: 9092, label: kafka } }
+  - { name: producer, group: Clients, user: appuser, description: "Client machine for producing and admin commands" }
+  - { name: consumer, group: Clients, user: appuser, description: "Client machine for consuming" }
+  - { name: connect, group: Integration, user: appuser, description: "Kafka Connect worker", service: { port: 8083, label: connect } }
+  - { name: workstation, group: Workstation, local: true, description: "The lab gateway itself (no Kafka tools)" }

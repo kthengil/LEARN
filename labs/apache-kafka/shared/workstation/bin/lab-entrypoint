@@ -1,0 +1,29 @@
+#!/bin/bash
+# Workstation start-up: SSH key, generated config, status monitor, terminal gateway, web server.
+set -euo pipefail
+mkdir -p /etc/lab-keys
+install -d -m 755 -o lab -g lab /run/lab
+chown lab:lab /home/lab
+install -d -m 700 -o lab -g lab /home/lab/.ssh
+
+# One key per lab, kept in the workstation's home volume. Lab machines trust it through the shared lab-keys volume.
+if [[ ! -f /home/lab/.ssh/id_ed25519 ]]; then
+  su-exec lab ssh-keygen -q -t ed25519 -N '' -C "lab-workstation" -f /home/lab/.ssh/id_ed25519
+fi
+install -m 644 /home/lab/.ssh/id_ed25519.pub /etc/lab-keys/authorized_keys
+
+lab-render
+chown lab:lab /home/lab/.ssh/config
+
+# Optional lab hook, run once as root at start-up (for example to seed config files shared with lab services).
+if [[ -x /opt/lab/start.sh ]]; then /opt/lab/start.sh; fi
+
+su-exec lab lab-status &
+HOME=/home/lab su-exec lab ttyd --writable --url-arg --interface lo --port 7681 --base-path /tty \
+  -t fontSize=14 -t 'fontFamily=ui-monospace, Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace' \
+  -t 'theme={"background":"#0d0f14","foreground":"#d6d9de","cursor":"#f59e0b"}' \
+  -t disableLeaveAlert=true -t titleFixed=lab \
+  /usr/local/bin/lab-connect &
+
+echo "lab workstation ready: $(python3 -c 'import json;print(json.load(open("/run/lab/lab.json"))["name"])')"
+exec nginx -g 'daemon off;'

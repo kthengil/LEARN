@@ -1,0 +1,61 @@
+# Ansible course lab. Start:  docker compose up -d   then open  http://localhost:28201
+# Everything happens in the browser; nothing but Docker is needed on your machine.
+name: ansible-lab
+
+x-node: &node
+  build: { context: ./node, dockerfile: Containerfile }
+  image: ${LAB_REGISTRY:-localhost}/lab/ansible-node:rocky9
+  networks: [lab]
+  restart: unless-stopped
+  # systemd runs as PID 1. It needs a writable cgroup tree: a private cgroup namespace plus CAP_SYS_ADMIN
+  # lets each node remount only its own cgroups. No --privileged, no host mounts.
+  cgroup: private
+  cap_add: [SYS_ADMIN]
+  tmpfs: [/run, /run/lock, /tmp]
+  volumes:
+    - lab-keys:/etc/lab-keys:ro
+    - ansible-keys:/etc/ansible-keys:ro
+
+services:
+  # Browser entry point and SSH jump host, built from the shared lab platform plus this lab's lab.yaml.
+  workstation:
+    build:
+      context: ./shared/workstation
+      dockerfile: Containerfile
+      additional_contexts:
+        lab: .
+    image: ${LAB_REGISTRY:-localhost}/lab/ansible-workstation:1
+    hostname: workstation
+    ports: ["127.0.0.1:${LAB_PORT:-28201}:8080"]
+    volumes:
+      - lab-keys:/etc/lab-keys
+      - workstation-home:/home/lab
+    networks: [lab]
+    restart: unless-stopped
+
+  # The Ansible control node: ansible-core, ansible-lint and the lab project in ~/lab.
+  controller:
+    build: { context: ./controller, dockerfile: Containerfile }
+    image: ${LAB_REGISTRY:-localhost}/lab/ansible-controller:2.21.5
+    hostname: controller
+    init: true
+    networks: [lab]
+    restart: unless-stopped
+    volumes:
+      - lab-keys:/etc/lab-keys:ro
+      - ansible-keys:/etc/ansible-keys
+      - controller-home:/home/ansible
+
+  node1: { <<: *node, hostname: node1 }
+  node2: { <<: *node, hostname: node2 }
+  node3: { <<: *node, hostname: node3 }
+  node4: { <<: *node, hostname: node4 }
+
+networks:
+  lab: {}
+
+volumes:
+  lab-keys: {}
+  ansible-keys: {}
+  workstation-home: {}
+  controller-home: {}

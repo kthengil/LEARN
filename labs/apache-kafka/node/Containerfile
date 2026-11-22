@@ -1,0 +1,17 @@
+# One image for every Kafka machine in the lab: brokers, client machines and the Connect worker.
+# The official Kafka image plus sshd (the workstation reaches every machine over SSH),
+# libstdc++ (RocksDB, used by Kafka Streams, needs it) and curl (Kafka Connect REST API).
+FROM docker.io/apache/kafka:4.1.0
+USER root
+RUN apk add --no-cache openssh-server bash su-exec libstdc++ curl less vim nano procps \
+ && sed -i -E 's#^(appuser:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:).*#\1/bin/bash#' /etc/passwd \
+ && sed -i -E 's#^appuser:!#appuser:*#' /etc/shadow \
+ && mkdir -p /etc/lab /var/log/kafka /var/lib/kafka/data /data \
+ && chown appuser:appuser /etc/lab /var/log/kafka /var/lib/kafka/data /data \
+ && printf '%s\n' 'AuthorizedKeysFile /etc/lab-keys/authorized_keys' 'PasswordAuthentication no' \
+      'KbdInteractiveAuthentication no' 'PermitRootLogin no' 'AllowUsers appuser' 'PrintLastLog no' \
+      > /etc/ssh/sshd_config.d/lab.conf
+COPY --chmod=755 entrypoint.sh /usr/local/bin/lab-node-entrypoint
+COPY --chmod=755 kafka-service /usr/local/bin/kafka-service
+COPY connect-distributed.properties /etc/lab/connect-distributed.properties
+ENTRYPOINT ["/usr/local/bin/lab-node-entrypoint"]

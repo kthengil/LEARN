@@ -1,0 +1,4 @@
+# Loki for the Observability lab, configured for the lab's S3 store.
+FROM docker.io/grafana/loki:3.7.9
+COPY config.yaml /etc/loki/lab.yaml
+CMD ["-config.file=/etc/loki/lab.yaml", "-target=all"]
