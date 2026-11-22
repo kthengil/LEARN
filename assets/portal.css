@@ -150,15 +150,21 @@ a:hover { text-decoration: underline; }
 .brand-lockup:hover { text-decoration: none; opacity: 0.92; }
 
 .brand-logo {
+  width: 32px;
   height: 28px;
-  width: auto;
+  max-width: 32px;
+  max-height: 28px;
+  object-fit: contain;
   display: block;
   flex-shrink: 0;
 }
 
 .brand-wordmark {
+  width: 96px;
   height: 18px;
-  width: auto;
+  max-width: 96px;
+  max-height: 18px;
+  object-fit: contain;
   display: block;
   flex-shrink: 0;
 }
